@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="hdd-cdd-calculator",
-    version="0.1.1",
+    version="0.1.2",
     author="Ryan Kmetz",
     author_email="consultrmk@gmail.com",
     description="A Python library for calculating Heating Degree Days (HDD) and Cooling Degree Days (CDD) using NWS API data",
