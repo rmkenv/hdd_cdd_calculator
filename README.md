@@ -1,5 +1,3 @@
-Here's an improved, well-structured, and polished version of your README.md for the HDD/CDD Calculator project:
-
 # HDD/CDD Calculator
 
 A Python library for calculating Heating Degree Days (HDD) and Cooling Degree Days (CDD) using weather data from the National Weather Service (NWS) API.
