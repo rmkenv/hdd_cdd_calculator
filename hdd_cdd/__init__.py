@@ -8,7 +8,7 @@ from .calculator import (
 )
 from .exceptions import NWSAPIError, InvalidCoordinatesError
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "calculate_degree_days",
