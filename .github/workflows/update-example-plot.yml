@@ -1,9 +1,10 @@
+
 name: Update Example Plot
 
 on:
   push:
     branches: ["main"]
-  workflow_dispatch:  # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,16 +21,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install dependencies (with viz extras)
         run: |
           pip install --upgrade pip
-          pip install .[viz]
+          pip install .[dev,viz]
+
+      - name: Run tests
+        run: |
+          pytest --maxfail=1 --disable-warnings -q
 
       - name: Run example CLI to generate plot
+        if: success()   # Only run if tests passed
         run: |
           python -m hdd_cdd_calculator --example
 
       - name: Commit updated plot
+        if: success()   # Only commit if tests + example succeed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
