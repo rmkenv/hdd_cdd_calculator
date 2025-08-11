@@ -9,6 +9,7 @@ using multiple weather data sources such as:
 
 The package also includes:
     * Utilities for coordinate validation, temperature conversions, and HDD/CDD calculations
+    * CSV utilities for reading and aligning energy consumption data
     * Unified API for selecting a data source
     * Linear regression analysis between degree days and energy consumption
     * Visualization support for regression results
@@ -32,6 +33,13 @@ from .regression import perform_regression
 
 # Visualization
 from .visualization import plot_regression
+
+# CSV utilities
+from .csv_utils import (
+    read_energy_data_from_csv,
+    read_energy_data_with_dates,
+    align_energy_with_degree_days,
+)
 
 # Utilities
 from .utils import (
@@ -66,6 +74,11 @@ __all__ = [
 
     # Visualization
     "plot_regression",
+
+    # CSV utilities
+    "read_energy_data_from_csv",
+    "read_energy_data_with_dates",
+    "align_energy_with_degree_days",
 
     # Data structures
     "DegreeDaysResult",
