@@ -1,0 +1,18 @@
+# Include important top-level files
+include README.md
+include LICENSE
+
+# Include pyproject.toml so builds work from sdist
+include pyproject.toml
+
+# Include any documentation sources
+recursive-include docs *.md *.rst *.txt
+
+# Exclude unnecessary stuff from sdist
+prune tests
+prune docs/_build
+prune examples
+prune .github
+
+# Remove temporary or irrelevant files
+global-exclude *.py[cod] __pycache__ *.so *.DS_Store
