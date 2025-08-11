@@ -11,6 +11,7 @@ The package also includes:
     * Utilities for coordinate validation, temperature conversions, and HDD/CDD calculations
     * Unified API for selecting a data source
     * Linear regression analysis between degree days and energy consumption
+    * Visualization support for regression results
 """
 
 # NWS data source
@@ -28,6 +29,9 @@ from .data_sources import get_degree_days
 
 # Regression analysis
 from .regression import perform_regression
+
+# Visualization
+from .visualization import plot_regression
 
 # Utilities
 from .utils import (
@@ -54,11 +58,14 @@ __all__ = [
     # Meteostat API
     "fetch_meteostat_data",
 
-    # Unified multi-source
+    # Unified multi-source API
     "get_degree_days",
 
     # Regression analysis
     "perform_regression",
+
+    # Visualization
+    "plot_regression",
 
     # Data structures
     "DegreeDaysResult",
