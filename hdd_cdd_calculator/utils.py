@@ -1,9 +1,7 @@
 from typing import Tuple
 from .exceptions import InvalidCoordinatesError
 
-# -------------------------
-# Coordinate Validation
-# -------------------------
+
 def validate_coordinates(lat: float, lon: float) -> Tuple[float, float]:
     """
     Validate and standardize coordinates.
@@ -19,32 +17,31 @@ def validate_coordinates(lat: float, lon: float) -> Tuple[float, float]:
         InvalidCoordinatesError: If coordinates are invalid.
     """
     if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
-        raise InvalidCoordinatesError(f"Invalid coordinates: ({lat}, {lon})")
+        raise InvalidCoordinatesError(lat, lon)
 
     # Round to 4 decimal places (~11 meters precision)
     return round(lat, 4), round(lon, 4)
 
-# -------------------------
-# Temperature Conversions
-# -------------------------
+
 def fahrenheit_to_celsius(temp_f: float) -> float:
-    """Convert temperature from °F to °C."""
-    return (temp_f - 32) * 5.0 / 9.0
+    """Convert Fahrenheit to Celsius."""
+    return (temp_f - 32) * 5 / 9
+
 
 def celsius_to_fahrenheit(temp_c: float) -> float:
-    """Convert temperature from °C to °F."""
-    return (temp_c * 9.0 / 5.0) + 32
+    """
+    Convert Celsius to Fahrenheit.
+    """
+    return temp_c * 9 / 5 + 32
 
-# -------------------------
-# Temperature Calculations
-# -------------------------
+
 def mean_temperature(high: float, low: float) -> float:
-    """Return the average of the daily high and low temperatures."""
+    """
+    Calculate the mean temperature from high and low.
+    """
     return (high + low) / 2
 
-# -------------------------
-# Degree Day Calculations
-# -------------------------
+
 def calculate_degree_days(high_temp: float, low_temp: float, base_temp: float = 65.0) -> Tuple[float, float]:
     """
     Calculate Heating Degree Days (HDD) and Cooling Degree Days (CDD)

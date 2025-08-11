@@ -2,8 +2,14 @@
 import argparse
 from pathlib import Path
 
-from . import get_degree_days_for_period
-from .analysis import align_energy_with_degree_days, perform_regression, plot_regression
+# Set matplotlib backend for headless environments
+import matplotlib
+matplotlib.use('Agg')
+
+from .data_sources import get_degree_days
+from .csv_utils import align_energy_with_degree_days
+from .regression import perform_regression
+from .visualization import plot_regression
 
 
 def run_example():
@@ -19,12 +25,13 @@ def run_example():
     end_date = "2023-06-10"
     lat, lon = 40.7128, -74.0060
 
-    # Step 1: Fetch HDD data
-    dd_results = get_degree_days_for_period(
+    # Step 1: Fetch HDD data using Meteostat for historical data
+    dd_results = get_degree_days(
         lat=lat,
         lon=lon,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        source="meteostat"
     )
 
     # Step 2: Align CSV data with HDD results
@@ -46,16 +53,17 @@ def run_example():
         energy_vals,
         model,
         save_path=plot_path,
-        show=True
+        show=False
     )
+    print(f"Plot saved to: {plot_path}")
 
 
 def main():
     """CLI entry point for the HDD/CDD calculator package."""
     parser = argparse.ArgumentParser(description="HDD/CDD Calculator CLI")
     parser.add_argument(
-        "--example", 
-        action="store_true", 
+        "--example",
+        action="store_true",
         help="Run the package's example workflow"
     )
     args = parser.parse_args()

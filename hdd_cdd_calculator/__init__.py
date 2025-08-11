@@ -16,7 +16,7 @@ The package also includes:
 """
 
 # NWS data source
-from .nws_api import (
+from .calculator import (
     get_degree_days_for_location,
     get_degree_days_for_period,
     DegreeDaysResult,

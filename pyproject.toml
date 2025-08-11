@@ -69,9 +69,3 @@ tests = [
 [tool.setuptools]
 # Make sure setuptools only packages our main code
 packages = ["hdd_cdd_calculator"]
-package-dir = {"" = "."}
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["hdd_cdd_calculator*"]
-exclude = ["tests*", "docs*", "examples*"]
