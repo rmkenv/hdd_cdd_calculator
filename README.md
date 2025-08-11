@@ -1,188 +1,211 @@
 # HDD/CDD Calculator
 
-A Python library for calculating **Heating Degree Days (HDD)** and **Cooling Degree Days (CDD)** using weather data from the **U.S. National Weather Service (NWS) API**, with a modular design ready for additional weather data sources (e.g., Meteostat).
+[![Update Example Plot](https://github.com/rmkenv/hdd_cdd_calculator/actions/workflows/update-example-plot.yml/badge.svg)](https://github.com/rmkenv/hdd_cdd_calculator/actions/workflows/update-example-plot.yml)
+[![PyPI version](https://img.shields.io/pypi/v/hdd-cdd-calculator)](https://pypi.org/project/hdd-cdd-calculator/)
+[![Python versions](https://img.shields.io/pypi/pyversions/hdd-cdd-calculator)](https://pypi.org/project/hdd-cdd-calculator/)
 
-Heating and Cooling Degree Days are widely used in **energy demand prediction, HVAC planning, and climatology analysis**.  
-This library provides an easy interface to retrieve forecast or historical temperature data and compute HDD/CDD.
+A Python library for calculating **Heating Degree Days (HDD)** and **Cooling Degree Days (CDD)** from multiple weather data sources, including:
 
-[![PyPI version](https://img.shields.io/pypi/v/hdd-cdd-calculator.svg)](https://pypi.org/project/hdd-cdd-calculator/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+- **U.S. National Weather Service (NWS) API** – forecast data  
+- **Meteostat** – global historical weather data
+
+The package also supports:
+- Automated alignment of energy usage CSV data with degree days
+- Linear regression analysis between degree days and energy consumption
+- Visualization of regression results
+- An **included example dataset** for quick testing
+- A simple **CLI** to run the full workflow and save the plot
 
 ---
 
 ## ✨ Features
 
-- **Multiple data sources** – NWS API out-of-the-box, with design to add more (e.g., Meteostat).
-- **Flexible calculations** – Any geographic location by latitude/longitude.
-- **Custom base temperature** – Default 65°F, but easily changed.
-- **Date range support** – Retrieve degree day data for specific periods.
-- **Utility functions** – Coordinate validation, temperature conversions, mean temperature calculation.
-- **Graceful error handling** – Custom exception classes for API and input errors.
-- **Type hints** – For improved IDE support.
-- **Unit tests included** – For core functionality.
-- **PyPI-ready** – Easily installable.
+- Calculate HDD/CDD for any location by latitude/longitude
+- Custom base temperature support
+- Retrieve degree day data for specific date ranges
+- **Two data sources**: NWS (U.S. forecast) and Meteostat (global historical)
+- CSV utilities for loading and aligning energy consumption data
+- **Linear regression** between degree days and energy usage
+- **Matplotlib visualization** of results
+- CLI example that runs end-to-end and saves a screenshot
+- Clear error handling and type hints
+- PyPI-ready packaging
 
 ---
 
 ## 📦 Installation
 
-Install from PyPI:
-
+From PyPI:
 ```
 pip install hdd-cdd-calculator
 ```
 
-Or install from source:
-
+Optional extras:
 ```
-git clone https://github.com/rmkenv/hdd_cdd_calculator.git
-cd hdd_cdd_calculator
-pip install .
+pip install hdd-cdd-calculator[dev]   # dev tools (pytest, linting, typing)
+pip install hdd-cdd-calculator[viz]   # includes matplotlib for plotting
 ```
 
----
-
-## 🚀 Usage
-
-### **Basic Usage**
-Get HDD/CDD results for the White House coordinates (forecast data):
-
-```
-from hdd_cdd import get_degree_days_for_location
-
-results = get_degree_days_for_location(38.8977, -77.0365)
-
-for result in results:
-    print(f"Date: {result.date}")
-    print(f"High: {result.high_temp}°F, Low: {result.low_temp}°F")
-    print(f"Mean: {result.mean_temp:.1f}°F")
-    print(f"HDD: {result.hdd:.1f}, CDD: {result.cdd:.1f}")
-    print()
-```
-
----
-
-### **Advanced Usage** – Specific Date Range
-
-```
-from hdd_cdd import get_degree_days_for_period
-
-# Retrieve June 2023 data for New York City
-results = get_degree_days_for_period(
-    lat=40.7128,
-    lon=-74.0060,
-    start_date="2023-06-01",
-    end_date="2023-06-30"
-)
-
-total_hdd = sum(r.hdd for r in results)
-total_cdd = sum(r.cdd for r in results)
-
-print(f"Total HDD: {total_hdd:.1f}")
-print(f"Total CDD: {total_cdd:.1f}")
-```
-
----
-
-## 📖 API Reference
-
-### **Functions**
-#### `get_degree_days_for_location(lat, lon, base_temp=65.0)`
-Fetches forecast data for the given coordinates and calculates HDD and CDD.
-
-- **`lat`** *(float)* – Latitude (-90 to 90)
-- **`lon`** *(float)* – Longitude (-180 to 180)
-- **`base_temp`** *(float)* – Base temperature in °F (default: 65.0)
-- **Returns** – List of `DegreeDaysResult` objects.
-
----
-
-#### `get_degree_days_for_period(lat, lon, start_date, end_date, base_temp=65.0)`
-Same as above, but filters results to the provided date range (inclusive).
-
-- **`start_date`**, **`end_date`** – Strings in `YYYY-MM-DD` format.
-
----
-
-#### `calculate_degree_days(high_temp, low_temp, base_temp=65.0)`
-Utility function to calculate HDD/CDD given high/low temps.
-
----
-
-### **Data Structures**
-#### `DegreeDaysResult` *(NamedTuple)*
-- `date` (str)
-- `high_temp` (float)
-- `low_temp` (float)
-- `mean_temp` (float)
-- `hdd` (float)
-- `cdd` (float)
-
----
-
-## ⚙ Development & Testing
-
-Clone the repo and install dependencies:
-
+From source:
 ```
 git clone https://github.com/rmkenv/hdd_cdd_calculator.git
 cd hdd_cdd_calculator
 pip install -e .[dev]
 ```
 
-Run the tests:
+---
 
+## 🚀 Basic Usage
+
+### NWS Data Source
 ```
-pytest
+from hdd_cdd_calculator import get_degree_days
+
+results = get_degree_days(
+    lat=38.8977,
+    lon=-77.0365,
+    start_date="2023-06-01",
+    end_date="2023-06-07",
+    source="nws"
+)
+
+for r in results:
+    print(f"{r.date} | High: {r.high_temp}°F | Low: {r.low_temp}°F | HDD: {r.hdd} | CDD: {r.cdd}")
 ```
 
-Format and lint code:
-
+### Meteostat Data Source
 ```
-black .
-flake8
-mypy .
+from hdd_cdd_calculator import get_degree_days
+
+results = get_degree_days(
+    lat=40.7128,
+    lon=-74.0060,
+    start_date="2023-06-01",
+    end_date="2023-06-30",
+    source="meteostat"
+)
 ```
 
 ---
 
-## 🤝 Contributing
+## 📂 Working with Energy CSVs
 
-1. Fork the repository.
-2. Create your feature branch:  
-   `git checkout -b feature/my-feature`
-3. Commit your changes:  
-   `git commit -m 'Add some feature'`
-4. Push to the branch:  
-   `git push origin feature/my-feature`
-5. Open a pull request.
+Expected CSV headers:
+```
+date,kwh,mmbtu,gal
+```
 
-Contributions are welcome! Please ensure your code passes tests before submitting.
+### Load Energy Data
+```
+from hdd_cdd_calculator import read_energy_data_from_csv
+energy_values = read_energy_data_from_csv("energy_data.csv", column="kwh")
+```
+
+### Align CSV & Degree Days → Regression → Plot
+```
+from hdd_cdd_calculator import (
+    get_degree_days_for_period,
+    align_energy_with_degree_days,
+    perform_regression,
+    plot_regression
+)
+import pandas as pd
+
+# Step 1: Fetch HDD data
+dd_results = get_degree_days_for_period(
+    lat=40.7128,
+    lon=-74.0060,
+    start_date="2023-06-01",
+    end_date="2023-06-10"
+)
+
+# Step 2: Align with CSV
+energy_vals, hdd_vals = align_energy_with_degree_days(
+    dd_results,
+    "examples/sample_energy_data.csv",
+    energy_column="kwh",
+    degree_day_type="hdd"
+)
+
+# Step 3: Fit regression
+model = perform_regression(hdd_vals, energy_vals)
+print(f"Slope: {model.coef_:.2f}, Intercept: {model.intercept_:.2f}")
+
+# Step 4: Plot and save
+plot_regression(
+    pd.Series(hdd_vals),
+    pd.Series(energy_vals),
+    model,
+    save_path="examples/regression_plot.png"  # Save file in examples/
+)
+```
+
+---
+
+## ⚡ Quick Try (With Included Dataset)
+
+We include a complete dataset + CLI workflow.
+
+From the repo root or after installing:
+```
+python -m hdd_cdd_calculator --example
+```
+
+This will:
+1. Fetch HDD data for NYC (June 1–10, 2023)  
+2. Align with `examples/sample_energy_data.csv`  
+3. Perform regression  
+4. Display a plot and save it to `examples/regression_plot.png`
+
+### Example Output
+![Regression Example](examples/regression_plot.png)
+
+---
+
+## 📖 API Overview
+
+**Data fetching**
+- `get_degree_days_for_location(...)`
+- `get_degree_days_for_period(...)`
+- `fetch_meteostat_data(...)`
+- `get_degree_days(...)` — unified source selector
+
+**CSV utilities**
+- `read_energy_data_from_csv(path, column="kwh")`
+- `read_energy_data_with_dates(path, column="kwh")`
+- `align_energy_with_degree_days(degree_days, csv, energy_column="kwh", degree_day_type="hdd")`
+
+**Analysis**
+- `perform_regression(degree_days, energy_usage)`
+- `plot_regression(degree_days, energy_usage, model, save_path=None, show=True)`
+
+**Utilities**
+- `validate_coordinates(...)`
+- `calculate_degree_days(...)`
+- Temperature conversions: `fahrenheit_to_celsius(...)`, `celsius_to_fahrenheit(...)`
+
+---
+
+## 🧪 Development
+
+Clone and install with developer tools:
+```
+git clone https://github.com/rmkenv/hdd_cdd_calculator.git
+cd hdd_cdd_calculator
+pip install -e .[dev]
+```
+
+Run tests:
+```
+pytest
+```
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
----
-
-## 📚 Additional Project Files
-- `pyproject.toml` — Build system configuration.
-- `setup.py` / `setup.cfg` — Package configuration (for packaging to PyPI).
-- `tests/` — Unit tests.
-- `docs/` — Documentation.
-
----
-
-**Author:** Ryan Kmetz  
-📧 consultrmk@gmail.com
-
-Repository: [GitHub – rmkenv/hdd_cdd_calculator](https://github.com/rmkenv/hdd_cdd_calculator)
-PyPI: [hdd-cdd-calculator](https://pypi.org/project/hdd-cdd-calculator/)
+**Author:** Ryan Kmetz
 ```
 
-
-
-If you’d like, I can also add a **section for future “Meteostat” integration** so contributors see that multi‑source support is planned.  
-Do you want me to add that “Future Development” section?
