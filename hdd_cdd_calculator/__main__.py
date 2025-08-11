@@ -1,13 +1,10 @@
 # hdd_cdd_calculator/__main__.py
 import argparse
-import pandas as pd
 from pathlib import Path
-from . import (
-    get_degree_days_for_period,
-    align_energy_with_degree_days,
-    perform_regression,
-    plot_regression,
-)
+
+from . import get_degree_days_for_period
+from .analysis import align_energy_with_degree_days, perform_regression, plot_regression
+
 
 def run_example():
     """Run the included example workflow."""
@@ -43,17 +40,31 @@ def run_example():
     print(f"Slope: {model.coef_[0]:.2f} | Intercept: {model.intercept_:.2f}")
 
     # Step 4: Plot results
-    plot_regression(pd.Series(hdd_vals), pd.Series(energy_vals), model)
+    plot_path = Path(__file__).resolve().parent.parent / "examples" / "regression_plot.png"
+    plot_regression(
+        hdd_vals,
+        energy_vals,
+        model,
+        save_path=plot_path,
+        show=True
+    )
+
 
 def main():
+    """CLI entry point for the HDD/CDD calculator package."""
     parser = argparse.ArgumentParser(description="HDD/CDD Calculator CLI")
-    parser.add_argument("--example", action="store_true", help="Run the package's example workflow")
+    parser.add_argument(
+        "--example", 
+        action="store_true", 
+        help="Run the package's example workflow"
+    )
     args = parser.parse_args()
 
     if args.example:
         run_example()
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()
