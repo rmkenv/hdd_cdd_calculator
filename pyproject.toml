@@ -1,3 +1,6 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = [
+    "setuptools>=65",  # Updated for modern PEP 621 support
+    "wheel>=0.38.0"    # Recent wheel version for Python 3.12+
+]
 build-backend = "setuptools.build_meta"
