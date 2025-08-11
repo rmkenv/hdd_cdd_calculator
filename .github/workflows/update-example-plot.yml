@@ -1,0 +1,38 @@
+name: Update Example Plot
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:  # allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .[viz]
+
+      - name: Run example CLI to generate plot
+        run: |
+          python -m hdd_cdd_calculator --example
+
+      - name: Commit updated plot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add examples/regression_plot.png
+          git commit -m "Auto-update regression plot [skip ci]" || echo "No changes to commit"
+          git push
