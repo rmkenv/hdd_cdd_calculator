@@ -65,3 +65,13 @@ tests = [
 "Documentation" = "https://github.com/rmkenv/hdd_cdd_calculator/tree/main/docs"
 "Source" = "https://github.com/rmkenv/hdd_cdd_calculator"
 "Tracker" = "https://github.com/rmkenv/hdd_cdd_calculator/issues"
+
+[tool.setuptools]
+# Make sure setuptools only packages our main code
+packages = ["hdd_cdd_calculator"]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hdd_cdd_calculator*"]
+exclude = ["tests*", "docs*", "examples*"]
