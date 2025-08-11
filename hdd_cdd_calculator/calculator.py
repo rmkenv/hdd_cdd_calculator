@@ -1,7 +1,8 @@
 import requests
-from datetime import datetime, timedelta
-from typing import List, NamedTuple, Optional, Tuple
+from datetime import datetime
+from typing import List, NamedTuple, Tuple
 from .exceptions import NWSAPIError, InvalidCoordinatesError
+from .utils import validate_coordinates, calculate_degree_days
 
 USER_AGENT = "HDD-CDD-Calculator/0.1 (https://github.com/rmkenv/hdd_cdd_calculator)"
 
@@ -13,23 +14,6 @@ class DegreeDaysResult(NamedTuple):
     mean_temp: float
     hdd: float
     cdd: float
-
-def calculate_degree_days(high_temp: float, low_temp: float, base_temp: float = 65.0) -> Tuple[float, float]:
-    """
-    Calculate Heating Degree Days (HDD) and Cooling Degree Days (CDD).
-    
-    Args:
-        high_temp: Daily high temperature in Fahrenheit
-        low_temp: Daily low temperature in Fahrenheit
-        base_temp: Base temperature for calculations (default: 65°F)
-    
-    Returns:
-        Tuple of (HDD, CDD)
-    """
-    mean_temp = (high_temp + low_temp) / 2
-    hdd = max(0, base_temp - mean_temp)
-    cdd = max(0, mean_temp - base_temp)
-    return hdd, cdd
 
 def get_forecast_url(lat: float, lon: float) -> str:
     """
@@ -46,9 +30,8 @@ def get_forecast_url(lat: float, lon: float) -> str:
         InvalidCoordinatesError: If coordinates are invalid
         NWSAPIError: If there's an error with the NWS API
     """
-    if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
-        raise InvalidCoordinatesError(f"Invalid coordinates: ({lat}, {lon})")
-    
+    lat, lon = validate_coordinates(lat, lon)
+
     try:
         url = f"https://api.weather.gov/points/{lat:.4f},{lon:.4f}"
         response = requests.get(url, headers={"User-Agent": USER_AGENT})
@@ -76,7 +59,6 @@ def get_daily_temps(forecast_url: str) -> List[Tuple[str, float, float]]:
         response.raise_for_status()
         data = response.json()
         
-        # Group periods by day and find high/low for each day
         daily_temps = {}
         for period in data['properties']['periods']:
             start_time = period['startTime']
@@ -94,7 +76,7 @@ def get_daily_temps(forecast_url: str) -> List[Tuple[str, float, float]]:
                 if daily_temps[date]['low'] is None or temp < daily_temps[date]['low']:
                     daily_temps[date]['low'] = temp
         
-        # Convert to list of tuples (date, high, low)
+        # Filter and prepare list results
         result = []
         for date, temps in sorted(daily_temps.items()):
             if temps['high'] is not None and temps['low'] is not None:
@@ -111,14 +93,14 @@ def get_degree_days_for_location(lat: float, lon: float, base_temp: float = 65.0
     Args:
         lat: Latitude
         lon: Longitude
-        base_temp: Base temperature for calculations (default: 65°F)
+        base_temp: Base temperature (default 65°F)
     
     Returns:
         List of DegreeDaysResult objects
     
     Raises:
         InvalidCoordinatesError: If coordinates are invalid
-        NWSAPIError: If there's an error with the NWS API
+        NWSAPIError: If there's an API error
     """
     forecast_url = get_forecast_url(lat, lon)
     daily_temps = get_daily_temps(forecast_url)
@@ -133,28 +115,25 @@ def get_degree_days_for_location(lat: float, lon: float, base_temp: float = 65.0
 
 def get_degree_days_for_period(lat: float, lon: float, start_date: str, end_date: str, base_temp: float = 65.0) -> List[DegreeDaysResult]:
     """
-    Get degree days for a specific location and date range.
+    Get degree days for a location and date range.
     
     Args:
         lat: Latitude
         lon: Longitude
-        start_date: Start date in YYYY-MM-DD format
-        end_date: End date in YYYY-MM-DD format
-        base_temp: Base temperature for calculations (default: 65°F)
+        start_date: Start date in YYYY-MM-DD
+        end_date: End date in YYYY-MM-DD
+        base_temp: Base temperature for HDD/CDD calculations
     
     Returns:
         List of DegreeDaysResult objects for the specified period
     
     Raises:
         InvalidCoordinatesError: If coordinates are invalid
-        NWSAPIError: If there's an error with the NWS API
+        NWSAPIError: If there's an API error
     """
     all_results = get_degree_days_for_location(lat, lon, base_temp)
-    
-    # Filter results for the specified period
-    filtered_results = [
+    filtered = [
         result for result in all_results
         if start_date <= result.date <= end_date
     ]
-    
-    return filtered_results
+    return filtered
