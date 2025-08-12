@@ -1,6 +1,6 @@
 # HDD/CDD Calculator
 
-[![Update Example Plot](https://github.com/rmkenv/hdd_cdd_calculator/actions/workflows/update-example-plot.yml/badge.svg)](https://github.com/rmkenv/hdd_cdd_calculator/actions/workflows/update-example-plot.yml)
+
 [![PyPI version](https://img.shields.io/pypi/v/hdd-cdd-calculator)](https://pypi.org/project/hdd-cdd-calculator/)
 [![Python versions](https://img.shields.io/pypi/pyversions/hdd-cdd-calculator)](https://pypi.org/project/hdd-cdd-calculator/)
 
