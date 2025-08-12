@@ -1,7 +1,7 @@
 from meteostat import Point, Daily
 from datetime import datetime
 from typing import List, NamedTuple
-from .utils import calculate_degree_days, validate_coordinates
+from .utils import calculate_degree_days, validate_coordinates, celsius_to_fahrenheit
 from .exceptions import NWSAPIError
 
 class DegreeDaysResult(NamedTuple):
@@ -12,22 +12,15 @@ class DegreeDaysResult(NamedTuple):
     hdd: float
     cdd: float
 
-def fetch_meteostat_data(lat: float, lon: float, start_date: str, end_date: str, base_temp: float = 65.0) -> List[DegreeDaysResult]:
+def fetch_meteostat_data(
+    lat: float,
+    lon: float,
+    start_date: str,
+    end_date: str,
+    base_temp: float = 65.0
+) -> List[DegreeDaysResult]:
     """
-    Fetch historical temperature data from Meteostat and calculate HDD/CDD.
-    
-    Args:
-        lat: Latitude (-90 to 90)
-        lon: Longitude (-180 to 180)
-        start_date: Start date (YYYY-MM-DD)
-        end_date: End date (YYYY-MM-DD)
-        base_temp: Base temperature for calculations (default: 65°F)
-    
-    Returns:
-        List of DegreeDaysResult
-    
-    Raises:
-        NWSAPIError: if data fetching fails or other errors occur.
+    Fetch Meteostat daily temps, convert to °F, then calculate HDD/CDD with °F base temp.
     """
     lat, lon = validate_coordinates(lat, lon)
 
@@ -41,15 +34,30 @@ def fetch_meteostat_data(lat: float, lon: float, start_date: str, end_date: str,
 
         results = []
         for date, row in df.iterrows():
-            t_min = row['tmin']
-            t_max = row['tmax']
-            if t_min is None or t_max is None:
-                continue  # Skip incomplete data
-            hdd, cdd = calculate_degree_days(t_max, t_min, base_temp)
-            mean_temp = (t_max + t_min) / 2
+            t_min_c = row["tmin"]
+            t_max_c = row["tmax"]
+            if t_min_c is None or t_max_c is None:
+                continue  # skip incomplete days
+
+            # ✅ Convert C → F
+            t_min_f = celsius_to_fahrenheit(t_min_c)
+            t_max_f = celsius_to_fahrenheit(t_max_c)
+            mean_temp_f = (t_max_f + t_min_f) / 2
+
+            # HDD/CDD calc now consistent with °F base_temp
+            hdd, cdd = calculate_degree_days(t_max_f, t_min_f, base_temp)
+
             results.append(
-                DegreeDaysResult(date.strftime("%Y-%m-%d"), t_max, t_min, mean_temp, hdd, cdd)
+                DegreeDaysResult(
+                    date.strftime("%Y-%m-%d"),
+                    t_max_f,
+                    t_min_f,
+                    mean_temp_f,
+                    hdd,
+                    cdd,
+                )
             )
+
         return results
 
     except Exception as e:
